@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)http://www.cc.matsuyama-u.ac.jp/~dan/gl2.html -->
+<html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Geolocation API + Google Maps JavaScript API による GPS 情報の取得</title>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+<style type="text/css">
+html, body {
+	height:100%;
+	margin:0;
+	padding:0;
+}
+#map{
+	height:100%;
+}
+#area_name{
+	position:absolute;
+	bottom:0;
+}
+th{
+	text-align:center;
+}
+</style>
+<script type="text/javascript" charset="UTF-8" src="./Geolocation API + Google Maps JavaScript API による GPS 情報の取得_files/common.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./Geolocation API + Google Maps JavaScript API による GPS 情報の取得_files/util.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./Geolocation API + Google Maps JavaScript API による GPS 情報の取得_files/AuthenticationService.Authenticate"></script></head><body>
+<div id="map">位置情報の利用が許可されていません</div>
+<script type="text/javascript">
+	var map;
+	var p =	[
+		{ label: '樋', name: '樋又キャンパス',	position: {lat: 33.851915,  lng: 132.768875},
+			contents: '<a href="https://www.matsuyama-u.ac.jp/soshiki/101/himatacampus.html"><img src="https://www.matsuyama-u.ac.jp/uploaded/image/5457.jpg" width="100%"></a>' },
+		{ label: '書', name: '大学図書館',	position: {lat: 33.850430,  lng: 132.768293},
+			contents: '<iframe width="560" height="315" src="https://www.youtube.com/embed/AjPDc8DSJbw?t=40s" frameborder="0" allowfullscreen></iframe>' },
+		{ label: '薬', name: '薬学部',		position: {lat: 33.8506693, lng: 132.76651},
+			contents: '<iframe width="560" height="315" src="https://www.youtube.com/embed/GiJ_bpZ1YxU?t=56s" frameborder="0" allowfullscreen></iframe>' },
+		{ label: '松', name: '文京キャンパス',	position: {lat: 33.851001,  lng: 132.768677},
+			contents: '<iframe width="560" height="315" src="https://www.youtube.com/embed/xiC8Mkcy8gY" frameborder="0" allowfullscreen></iframe>' },
+		{ label: '院', name: '大学院',		position: {lat: 33.8510813, lng: 132.769420},
+			contents: '<iframe width="560" height="315" src="https://www.youtube.com/embed/suIBgpFFCwg" frameborder="0" allowfullscreen></iframe>' }
+	];
+	var marker = new Array(p.length);
+	var iw = new Array(p.length);
+
+	var information = [
+		function() {iw[0].open(map, marker[0]);},
+		function() {iw[1].open(map, marker[1]);},
+		function() {iw[2].open(map, marker[2]);},
+		function() {iw[3].open(map, marker[3]);},
+		function() {iw[4].open(map, marker[4]);}
+	];
+
+	function initMap(){
+		navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+	}
+	function successCallback(position){
+		var gl_text;
+		var x, y;
+
+		gl_text  = "<table>";
+		gl_text += "<tr><td>緯度（latitude）：</td><td>"  + position.coords.latitude  + "</td></tr>";
+		gl_text += "<tr><td>経度（longitude）：</td><td>" + position.coords.longitude + "</td></tr>";
+		gl_text += "<tr><td>精度（accuracy）：</td><td>"  + position.coords.accuracy  + " m</td></tr>";
+		gl_text += "<tr><td>高度（altitude）：</td><td>"  + position.coords.altitude  + "±" + position.coords.altitudeAccuracy + " m</td></tr>";
+		gl_text += "<tr><td>方角（heading）：</td><td>" + position.coords.heading + "</td></tr>";
+		gl_text += "<tr><td>速度（speed）：</td><td>" + position.coords.speed + "</td></tr>";
+		gl_text += "</table>";
+
+		x = position.coords.latitude;
+		y = position.coords.longitude;
+		var CurrentPosition = new google.maps.LatLng(x, y);
+
+		// Google Maps の表示
+		map = new google.maps.Map(document.getElementById('map'), {
+			// Geolocation API によって取得した現在位置
+			center: CurrentPosition,
+			zoom: 18
+		});
+
+		var infowindow = new google.maps.InfoWindow({
+			content: gl_text
+		});
+
+		var m = new google.maps.Marker({
+			title: '現在地',
+			position: CurrentPosition,
+			map: map,
+			draggable:true,
+			icon: {
+				path:google.maps.SymbolPath.CIRCLE,
+				scale:10,
+				fillColor: 'blue',
+				fillOpacity: 0.25,
+				strokeColor: 'blue',
+				strokeWeight: 4,
+				strokeOpacity: 0.75
+			}
+		});
+		m.addListener('click', function() {
+			infowindow.open(map, m);
+		});
+
+		for( var i = 0; i < p.length; i++ ){
+			iw[i] = new google.maps.InfoWindow({
+				content: '<b>' + p[i]['name'] + '</b><br>' + p[i]['contents']
+			});
+			marker[i] = new google.maps.Marker({
+				position: p[i]['position'],
+				label: p[i]['label'],
+				map: map,
+				title: p[i]['name']
+			});
+			marker[i].addListener('click', information[i]);
+		}
+	}
+
+	function errorCallback(error) {
+		var err_msg;
+		switch(error.code)
+		{
+			case 1:
+				err_msg = "位置情報の利用が許可されていません";
+				break;
+			case 2:
+				err_msg = "デバイスの位置が判定できません";
+				break;
+			case 3:
+				err_msg = "タイムアウトしました";
+				break;
+		}
+		document.getElementById("map").innerHTML = err_msg;
+	}
+</script>
+<script async="" defer="" src="./Geolocation API + Google Maps JavaScript API による GPS 情報の取得_files/js">
+</script>
+
+
+</body></html>
